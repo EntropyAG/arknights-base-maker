@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<title>Arknights Global Range Simulator</title>
+	<link rel="stylesheet" href="css/styles.css">
+	<link rel="shortcut icon" type="image/jpg" href="images/icons/favicon.ico" />
+</head>
+
+<body>
+	<h2>Check console (F12) to see the suggestions & logs</h2>
+	<div class="menu">
+		<fieldset id="lappyManager">
+			<legend>Planner</legend>
+			<label for="moraleMicro">Are you willing to micromanage morale?</label>
+			<input type="checkbox" id="moraleMicro"/>
+			<br class="clear" />
+
+			<label for="assumeE1">Assume 4* and lower are always at least E1 for base skills?</label>
+			<input type="checkbox" id="assumeE1"/>
+			<br class="clear" />
+
+			<label for="nbFacGold">How many Factories should produce gold?</label>
+			<input type="number" id="nbFacGold" min="0", max="5" value="0"/>
+			<br class="clear" />
+
+			<label for="nbFacEXP">How many Factories should produce EXP?</label>
+			<input type="number" id="nbFacEXP" min="0", max="5" value="0"/>
+			<br class="clear" />
+
+			<label for="ppCount">Number of Power Plants</label>
+			<input type="number" id="ppCount" min="1", max="3" value="2"/>
+			<br class="clear" />
+
+			<label for="lvl3tp">Number of level 3 Trading Posts</label>
+			<input type="number" id="lvl3tp" min="0", max="5" value="0"/>
+			<br class="clear" />
+
+			<label for="lvl2tp">Number of level 2 Trading Posts</label>
+			<input type="number" id="lvl2tp" min="0", max="5" value="0"/>
+			<br class="clear" />
+
+			<label for="lvl3fac">Number of level 3 Factories</label>
+			<input type="number" id="lvl3fac" min="0", max="5" value="0"/>
+			<br class="clear" />
+
+			<label for="lvl2fac">Number of level 2 Factories</label>
+			<input type="number" id="lvl2fac" min="0", max="5" value="0"/>
+			<br class="clear" />
+
+			<label for="highestDorm">Highest dorm level</label>
+			<input type="number" id="highestDorm" min="1", max="5" value="1"/>
+			<br class="clear" />
+
+			<label for="lvlHR">Office (HR) level</label>
+			<input type="number" id="lvlHR" min="1", max="3" value="1"/>
+			<br class="clear" />
+
+			<label for="krooster">Krooster username</label>
+			<input type="text" id="krooster"/>
+		</fieldset>
+		<button id="plan">Plan my base</button>
+	</div>
+	<!-- External resources preloaded first -->
+	<script type="text/javascript" src="resources/building_data.js"></script>
+	<script type="text/javascript" src="resources/character_table.js"></script>
+	
+	<!-- Config files -->
+	<script type="text/javascript" src="config/operators.js"></script>
+	<script type="text/javascript" src="config/skills.js"></script>
+	
+	<!-- Then utilities -->
+	<script type="text/javascript" src="scripts/core/utils.js"></script>
+	
+	<!-- Then objects -->
+	<script type="text/javascript" src="scripts/entities/operator.js"></script>
+
+	<!-- The processors -->
+	<script type="text/javascript" src="scripts/adapters/krooster.js"></script>
+	<script type="text/javascript" src="scripts/core/planner.js"></script>
+	
+	<!-- And finally the UI elements -->
+	<script type="text/javascript" src="scripts/core/ui.js"></script>
+
+</body>
+
+</html>
