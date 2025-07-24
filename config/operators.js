@@ -22,3 +22,11 @@ const A1_OPERATORS = [
     "char_120_hibisc",
     "char_121_lava"
 ];
+
+const BSW_OPERATORS = [
+    "char_235_jesica",
+    "char_240_wyvern",
+    "char_4105_almond",
+    "char_107_liskam",
+    "char_106_franka"
+];

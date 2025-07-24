@@ -25,7 +25,7 @@ class KroosterAdapter {
             let operators = kroosterAdapter.processOperators(response.data.roster);
             kroosterAdapter.forwardPlan(operators);
           }).catch(function(err) {
-            console.log("Fetch Error:", err);
+            console.log("Fetch Error while attempting to retrieve account data from Krooster:", err);
           });
     }
 
@@ -44,17 +44,28 @@ class KroosterAdapter {
     }
 
     forwardPlan(operators){
+        let base = new Base({
+          controlCenter: 5,
+          production:[
+            { type: "PP", level: 3 },
+            { type: "PP", level: 3 },
+            { type: "TP", level: 3 },
+            { type: "TP", level: 2 },
+            { type: "FAC", level: 3 },
+            { type: "FAC", level: 3 },
+            { type: "FAC", level: 2 },
+            { type: "FAC", level: 2 },
+            { type: "FAC", level: 2 },
+          ],
+          dorms: [2,1,1,1],
+          receptionRoom: 3,
+          workshop:      3,
+          trainingRoom:  3,
+          office:        3
+        });
         akPlanner.planify(
             operators,
-            {
-                "FAC3": parseInt(document.getElementById("lvl3fac").value),
-                "FAC2": parseInt(document.getElementById("lvl2fac").value),
-                "TP3": parseInt(document.getElementById("lvl3tp").value),
-                "TP2": parseInt(document.getElementById("lvl2tp").value),
-                "HR": parseInt(document.getElementById("lvlHR").value),
-                "DORM": parseInt(document.getElementById("highestDorm").value),
-                "PP": parseInt(document.getElementById("ppCount").value),
-            },
+            base,
             document.getElementById("moraleMicro").checked,
             document.getElementById("assumeE1").checked
         );

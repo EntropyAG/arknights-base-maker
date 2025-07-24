@@ -22,7 +22,16 @@ class Planner {
      * investment required. For instance, newer players may not realize that Purestream is a a large 40/60% gold
      * productivity depending on setup, so it makes it easier to spot easy ways to improve the base.
      */
-    planify(operators, setup, isMoraleMicro, isAssumeE1) {
+    planify(operators, base, isMoraleMicro, isAssumeE1) {
+
+        // Since 5 & 6* operators unlock their base skills at E2, it only makes a difference for 
+        if(isAssumeE1){
+            for(let operator of operators){
+                if(operator.elite === 0){
+                    operator.elite = 1;
+                }
+            }
+        }
 
         /***************************************************************
          ********** Evaluating combos and available operators **********
@@ -30,17 +39,17 @@ class Planner {
 
         // ========== SPECIAL ==========
 
-        let piSrSquadScore = this.evaluatePerceptionInformationSoundlessResonance(operators, setup, isMoraleMicro);
+        let piSrSquadScore = this.evaluatePerceptionInformationSoundlessResonance(operators, base, isMoraleMicro);
         console.log(piSrSquadScore);
-        let wpSquadScore = this.evaluateWordlyPlight(operators, setup, isMoraleMicro);
+        let wpSquadScore = this.evaluateWordlyPlight(operators, base, isMoraleMicro);
         console.log(wpSquadScore);
-        let automationScore = this.evaluateAutomation(operators, setup);
+        let automationScore = this.evaluateAutomation(operators, base);
         console.log(automationScore);
-        let pinusScore = this.evaluatePinus(operators, setup, isAssumeE1);
+        let pinusScore = this.evaluatePinus(operators, base);
         console.log(pinusScore);
-        let glasgowScore = this.evaluateGlasgow(operators, setup, isAssumeE1);
+        let glasgowScore = this.evaluateGlasgow(operators, base);
         console.log(glasgowScore);
-        let karlanScore = this.evaluateKarlanTrade(operators, setup, isAssumeE1);
+        let karlanScore = this.evaluateKarlanTrade(operators, base);
         console.log(karlanScore);
         let monhunScore = this.evaluateMonHun(operators);
         console.log(monhunScore);
@@ -48,19 +57,19 @@ class Planner {
         console.log(abyHuntScore);
         let jessBSWScore = this.evaluateJessicaBSW(operators);
         console.log(jessBSWScore);
-        let dunMesScore = this.evaluateDungeonMeshi(operators);
+        let dunMesScore = this.evaluateDungeonMeshi(operators, base);
         console.log(dunMesScore);
         let babelScore = this.evaluateBabel(operators);
         console.log(babelScore);
-        let puddingScore = this.evaluatePudding(operators, isAssumeE1);
+        let puddingScore = this.evaluatePudding(operators);
         console.log(puddingScore);
 
         // ========== FACTORY ==========
 
         // ---------- Teams ----------
 
-        //let vermeilExpScore = this.evaluateVermeilExp(operators, assumeE1);
-        //console.log(vermeilExpScore);
+        let vermeilExpScore = this.evaluateVermeil(operators, base);
+        console.log(vermeilExpScore);
 
 
         // ---------- Singles ----------
@@ -95,10 +104,11 @@ class Planner {
     /**
      * Evaluate the player's roster to see whether it's viable to run PI/SR
      * @param {Array[Operator]} operators: list of operators owned by the player, as imported
+     * @param {Base} base: the base setup of the player
      * @returns {Object}: with "rosmonPD" and "ebenPD" and their respective productivity
      * given the other operators
      */
-    evaluatePerceptionInformationSoundlessResonance(operators, setup, isMoraleMicro) {
+    evaluatePerceptionInformationSoundlessResonance(operators, base, isMoraleMicro) {
         let totalPI = 0;
         let totalSR = 0;
         let useDusk = false;
@@ -127,10 +137,10 @@ class Planner {
         // Next to see if we can add Whisperain (and possibly Saileach) to generate more PI
         let whisperain = operators.find(e => e.id === "char_436_whispr");
         if (whisperain && whisperain.elite === 2) {
-            if (setup.HR === 2) {
+            if (base.office === 2) {
                 totalPI += 10;
                 useWhisperain = true;
-            } else if (setup.HR === 3) {
+            } else if (base.office === 3) {
                 totalPI += 20;
                 useWhisperain = true;
             }
@@ -150,11 +160,11 @@ class Planner {
             useArturia = true;
         }
         if (czerny && czerny.elite === 2) {
-            totalPI += setup.DORM;
+            totalPI += base.getHighestDormLevel();
             useCzerny = true;
         }
         if (iris && iris.elite === 2) {
-            totalPI += setup.DORM;
+            totalPI += base.getHighestDormLevel();
             useIris = true;
         }
 
@@ -189,7 +199,7 @@ class Planner {
     /**
      * Evaluate the player's roster to see whether it's viable to run WP.
      */
-    evaluateWordlyPlight(operators, setup, isMoraleMicro) {
+    evaluateWordlyPlight(operators, base, isMoraleMicro) {
         let totalWP = 0;
         let useDusk = false;
         let useLing = false;
@@ -201,6 +211,7 @@ class Planner {
         let useShu = false;
         let useYu = false;
         let useJieyun = false;
+        let suiCount = 0;
 
         // Dusk & Ling require micromanaging their morale for PI generation, so skip if the player doesn't want to
         if (isMoraleMicro) {
@@ -220,10 +231,10 @@ class Planner {
         // Next to see if we can add Mulberry (and possibly Saileach) to generate more PI
         let mulberry = operators.find(e => e.id === "char_473_mberry");
         if (mulberry && mulberry.elite === 2) {
-            if (setup.HR === 2) {
+            if (base.office === 2) {
                 totalWP += 10;
                 useMulberry = true;
-            } else if (setup.HR === 3) {
+            } else if (base.office === 3) {
                 totalWP += 20;
                 useMulberry = true;
             }
@@ -248,29 +259,32 @@ class Planner {
         let yu = operators.find(e => e.id === "char_2026_yu");
         if (chongyue) {
             useChongyue = true;
-            totalWP += 5;
+            suiCount++;
             if (nian) {
                 useNian = true;
-                totalWP += 5;
+                suiCount++;
             }
 
             if (shu) {
                 useShu = true;
-                totalWP += 5;
+                suiCount++;
             }
 
             if (yu) {
                 useYu = true;
-                totalWP += 5;
+                suiCount++;
             }
 
             if (useDusk) {
-                totalWP += 5;
+                suiCount++;
             }
 
             if (useLing) {
-                totalWP += 5;
+                suiCount++;
             }
+
+            // Chongyue's skill is capped at 5 siblings
+            totalWP += Math.min(suiCount * 5, 25);
         }
 
         // Separate check for Shu that doesn't depend on Chungus, since she can provide FAC productivity with WP
@@ -278,7 +292,7 @@ class Planner {
             useShu = true;
         }
 
-        // Jieyun check, even at E0 there is some productivity, even if that's not really worth really
+        // Jieyun check, even at E0 there is some productivity, tho it's not really worth really
         let jieyun = operators.find(e => e.id === "char_4078_bdhkgt");
         let jieyunPD = 0;
         if (jieyun) {
@@ -310,8 +324,8 @@ class Planner {
     /**
      * Evaluate the player's roster to see whether it's viable to automation.
      */
-    evaluateAutomation(operators, setup) {
-        let ppCount = setup.PP;
+    evaluateAutomation(operators, base) {
+        let ppCount = base.getPowerPlantCount();
         let isLancetDead = false;
         let isLancetUsed = false;
         let isGreyyaltUsed = false;
@@ -353,11 +367,11 @@ class Planner {
         let purestream = operators.find(e => e.id === "char_385_finlpp");
         if (purestream && purestream.elite >= 1) {
             isPurestreamUsed = true;
-            purestreamPD = (setup.TP3 + setup.TP2) * 20;
+            purestreamPD = base.getTradingPostCount() * 20;
         }
 
-        // Returns on Passenger & Windflit are too low with a 2 PP setup, with a measly 20% at full potential
-        if (setup.PP === 3) {
+        // Returns on Passenger & Windflit are too low with PP, with a measly 20% at full potential
+        if (base.getPowerPlantCount() === 3) {
             let passenger = operators.find(e => e.id === "char_472_pasngr");
             if (passenger && passenger.elite === 2) {
                 isPassengerUsed = true;
@@ -394,7 +408,7 @@ class Planner {
      * The evaluation first covers gold production, then EXP, since they are identical
      * apart from the introduction of Flametail
      */
-    evaluatePinus(operators, setup, assumeE1) {
+    evaluatePinus(operators, base, assumeE1) {
         let isVivianaUsed = false;
         let isWildmaneUsed = false;
         let isAshlockUsed = false;
@@ -613,7 +627,7 @@ class Planner {
      * Because there are plenty of operators combos to test, we kinda have to list all the possible
      * combos within a TP
      */
-    evaluateKarlanTrade(operators, setup) {
+    evaluateKarlanTrade(operators, base) {
         let gnosis = operators.find(e => e.id === "char_206_gnosis");
         // No point in trying unless there is Gnosis, operators otherwise have subpar performance
         if(!gnosis || (gnosis && gnosis.elite < 2)){
@@ -835,7 +849,7 @@ class Planner {
      * Evaluate the player's roster to see whether it's viable to use Jessica alter with
      * a BSW (BlackSteel Worldwide) squad, along with Mizuki for Standardization skills
      */
-    evaluateDungeonMeshi(operators, setup) {
+    evaluateDungeonMeshi(operators, base) {
         let isSenshiUsed = false;
         let isMarcilleUsed = false;
         let isLaiosUsed = false;
@@ -852,7 +866,7 @@ class Planner {
 
         if(senshi && senshi.elite === 2){
             isSenshiUsed = true;
-            monsterMeal = setup.DORM;
+            monsterMeal = base.getHighestDormLevel();
         }
 
         // Laios
@@ -994,7 +1008,7 @@ class Planner {
      * A very mediocre team, as the 2% PD does not stack with similar buffs like Kal'tsit's,
      * yet requires sacrificing some PP productivity.
      */
-    evaluatePudding(operators, isAssumeE1) {
+    evaluatePudding(operators) {
         let isPuddingUsed = false;
         let isFristonUsed = false;
         let isJKUsed = false;
@@ -1013,7 +1027,7 @@ class Planner {
         let castle3 = operators.find(e => e.id === "char_286_cast3");
         let thrmx = operators.find(e => e.id === "char_376_therex");
 
-        if(pudding && (pudding.elite >= 1 || isAssumeE1)){
+        if(pudding && pudding.elite >= 1){
             isPuddingUsed = true;
         }
 
@@ -1037,44 +1051,46 @@ class Planner {
     }
 
     /**
-     * Evaluate the player's roster to see the best partners for Vermeil (EXP version)
+     * Evaluate the player's roster to see the best partners for Vermeil
      */
-    evaluateVermeilExp(operators, isAssumeE1) {
+    evaluateVermeil(operators, base) {
         let vermeil = operators.find(e => e.id === "char_190_clour");
-        if(!vermeil || (vermeil && vermeil.elite === 0 && !isAssumeE1)){
+        if(!vermeil || (vermeil && vermeil.elite === 0)){
             return {
                 "isVermeilUsed": false
             };
         }
 
-        let scene = operators.find(e => e.id === "char_336_folivo");
-        let pallas = operators.find(e => e.id === "char_485_pallas");
-        let ceobe = operators.find(e => e.id === "char_2013_cerber");
-        let executorAlter = operators.find(e => e.id === "char_1032_excu2");
-        let click = operators.find(e => e.id === "char_328_cammou");
-        let tragodia = operators.find(e => e.id === "char_1042_phatm2");
-        let msChristine = operators.find(e => e.id === "char_4198_christ");
-
-        let operatorsToTest = [
-            scene, pallas, ceobe, executorAlter, click, tragodia, msChristine
-        ].filter(e => e !== undefined);
+        // Retrieve all the listed operators, remove those who aren't found to save up on calcs
+        let operatorsToTest = operators.filter(e => [
+            "char_336_folivo", "char_485_pallas", "char_2013_cerber", "char_1032_excu2", "char_328_cammou",
+            "char_1042_phatm2", "char_4198_christ", "char_4138_narant", "char_4155_talr", "char_4171_wulfen",
+            "char_464_cement", "char_378_asbest", "char_452_bstalk", "char_500_noirc", "char_150_snakek"
+            ].indexOf(e.id) !== -1
+        );
 
         // We build squads of 2, since Vermeil will always be in the first slot
         let squads = this.__composeSquadsOf2(operatorsToTest);
-        let bestPerforming;
+        let bestPerformingExp;
+        let bestPerformingGold;
         for(let squad of squads){
             squad.push(vermeil);
-            let results = this.__getFactoryStats(squad);
-            if(!bestPerforming || results.totalProductivity > bestPerforming.totalProductivity){
-                bestPerforming = results;
+            let results = this.__getFactoryStats(squad, base);
+            // Replacing EXP squad if current is better
+            if(!bestPerformingExp || results.totalExpProductivity > bestPerformingExp.totalExpProductivity){
+                bestPerformingExp = results;
+            }
+
+            // Replacing Gold squad if current is better
+            if(!bestPerformingGold || results.totalGoldProductivity > bestPerformingGold.totalGoldProductivity){
+                bestPerformingGold = results;
             }
         }
 
-        // Extra check for Tragodia + Ms Christine, as they are best paired
-
         return {
             "isVermeilUsed": true,
-            "squad": bestPerforming
+            "squadExp": bestPerformingExp,
+            "squadGold": bestPerformingGold
         };
     }
 
@@ -1118,7 +1134,7 @@ class Planner {
                 }
 
                 for(let effect of Object.keys(SKILLS[skill.buffId])){
-                    if(buffs[effect] !== undefined){
+                    if(buffs[effect] !== undefined && skill.buffId.indexOf("trade") === 0){
                         buffs[effect] += SKILLS[skill.buffId][effect];
                     }
                 }
@@ -1165,11 +1181,16 @@ class Planner {
 
     /**
      * Given a list of 3 operators, return the expected stats for a factory
+     * TODO: Take into account Totter's lower morale for his (de)buffs
      * @param  {Array[Operator]} ops: An array containing 2 or 3 operators (functions with less)
-     * @param  {Array[Object]} setup: An array listing details about the base (number of dorms,
+     * @param  {Array[Object]} base: An array listing details about the base (number of dorms,
      * FAC & TP distribution...)
      */
-    __getFactoryStats(ops, setup){
+    __getFactoryStats(ops, base,
+        hasVivianaBuff = 0, hasFlametailBuff = 0, hasJKinPP = 0,
+        bswOpInBase = 0, robotsInPPCount = 0, isGummyInTP = 0,
+        monsterMealCount = 0
+    ){
         // As provided by the various operators
         let buffs = {
             // ======= General =======
@@ -1177,7 +1198,7 @@ class Planner {
             "productivity_exp_flat": 0,
             "productivity_gold_flat": 0,
             "productivity_per_hour_5_stacks": 0,
-            "cap_gold_flat": 0,
+            "productivity_per_hour_10_stacks": 0,
             "cap_exp_flat": 0,
             "cap_all_flat": 0,
             // ======= Specific combos =======
@@ -1188,37 +1209,61 @@ class Planner {
             "productivity_per_standard_skill": 0,
             "standardization_skill_count": 0,
             "convert_RT_PS_to_standard": 0,
-            // Pinus Sylvestris
+            // Pinus Sylvestris (Viviana/Flametail)
             "pinus_sylvestris_skill_count": 0,
             "has_wild_mane": 0,
-            // Rhine Tech
+            // Rhine Tech (Dorothy)
             "productivity_per_rhine_tech_skill": 0,
             "rhine_tech_skill_count": 0,
-            // Metalwork (Bryophyta, Thorns alter core)
+            // Metalwork (Bryophyta core)
             "productivity_per_metalwork": 0,
             "metalwork_skill_count": 0,
             // Vermeil
-            "productivity_per_total_cap": 0,
+            "productivity_per_total_cap_vermeil": 0,
+            "is_bubble_absent": 1,
             // Bubble
             "productivity_per_individual_cap_above_16": 0,
+            "productivity_per_total_cap_bubble": 0,
             "sum_of_cap_above_16": 0,
             // Narantuya
             "productivity_gold_per_dorm_sum": 0,
-            // Thorns alter
+            // Thorns alter, Purestream
             "productivity_gold_per_trading_post": 0,
             // Fang alter
-            "productivity_per_A1_operator": 0
-
+            "productivity_per_A1_operator": 0,
+            "A1_operator_count": 0,
+            // Almond
+            "productivity_gold_per_BSW_operator": 0,
+            // Alanna
+            "productivity_gold_per_robot_in_pp": 0,
+            "alanna_give_me_a_hand": 0,
+            // Warmy
+            "is_warmy_present": 0,
+            // Leto
+            "leto_through_thick_and_thin": 0,
+            // Waai Fu
+            "waai_fu_copy_productivity": 0,
+            // Minimalist
+            "engineering_robot_per_facility_level_max_64": 0,
+            "productivity_per_16_engineering_robot": 0,
+            "productivity_per_8_engineering_robot": 0,
+            // Marcille
+            "productivity_per_monster_meal": 0,
+            // Totter
+            "productivity_flat_if_morale_diff_gt_12": 0,
+            "cap_flat_if_morale_diff_gt_12": 0,
         };
 
+        // We keep adding all the operator skills to the list of buffs...
         for(let operator of ops){
             for(let skill of operator.getActiveSkills()){
+                // ...but only if they have some kind of effect, go to next skill
                 if(!SKILLS[skill.buffId]){
                     continue;
                 }
 
                 for(let effect of Object.keys(SKILLS[skill.buffId])){
-                    if(buffs[effect] !== undefined){
+                    if(buffs[effect] !== undefined && skill.buffId.indexOf("manu") === 0){
                         buffs[effect] += SKILLS[skill.buffId][effect];
                     }
                 }
@@ -1227,53 +1272,107 @@ class Planner {
             // ===== Complementary checks =====
 
             // sum_of_cap_above_16 (Bubble)
-            // Bubble's skill takes precedence over Vermeil's skill
+            if(operator.id === "char_369_bena"){
+                buffs.sum_of_cap_above_16 += 17;
+            }
 
-            // has_wild_mane (Wild Mane)
+            if(operator.id === "char_163_hpsts" && operator.elite === 2){
+                buffs.sum_of_cap_above_16 += 19;
+            }
+
+            // Bubble's skill takes precedence over Vermeil's skill
+            if(operator.id === "char_381_bubble"){
+                buffs.is_bubble_absent = 0;
+            }
+
+            // has_wild_mane (Wild Mane) - check necessary since WM shares the same skill with other PS
+            if(operator.id === "char_496_wildmn"){
+                buffs.has_wild_mane = 1;
+            }
+
+            // A1 operator count (Fang alter)
+            if(A1_OPERATORS.includes(operator.id)){
+                buffs.A1_operator_count += 1;
+            }
+
+            // Blacksteel Worldwide count (Almond)
+            if(BSW_OPERATORS.includes(operator.id)){
+                bswOpInBase += 1;
+            }
+
+            // Warmy present for Alanna buff
+            if(operator.id === "char_4081_warmy"){
+               buffs.is_warmy_present = 1;
+            }
+
+            // Waai Fu productivity copy, track highest PD
+            // TODO: Find out how to do this crap, WTF
         }
 
-        
+        // Generalistic
+        let allPD = 0
+            + buffs.productivity_flat
+            + buffs.productivity_per_hour_5_stacks  * (5/2 + 7) / 12 // 12h weighted average
+            + buffs.productivity_per_hour_10_stacks * (10/2 + 2) / 12 // 12h weighted average
+            // Vermeil
+            + buffs.cap_all_flat * buffs.productivity_per_total_cap_vermeil * buffs.is_bubble_absent
+            // Bubble
+            + buffs.productivity_per_individual_cap_above_16 * buffs.sum_of_cap_above_16
+            + (buffs.cap_all_flat - buffs.sum_of_cap_above_16) * buffs.productivity_per_total_cap_bubble
+            // Tragodia and Ms Christine in same FAC
+            + buffs.tragodia_present * buffs.christine_feasting * 30
+            + buffs.productivity_per_standard_skill * (
+                buffs.standardization_skill_count
+                + buffs.convert_RT_PS_to_standard * (
+                    buffs.rhine_tech_skill_count + buffs.pinus_sylvestris_skill_count
+                )
+            )
+            + buffs.pinus_sylvestris_skill_count * hasVivianaBuff * 7
+            + buffs.has_wild_mane * hasJKinPP * 5 // Justice Knight in PP and Wild Mane present
+            + buffs.rhine_tech_skill_count * buffs.productivity_per_rhine_tech_skill
+            + buffs.metalwork_skill_count * buffs.productivity_per_metalwork
+            + buffs.A1_operator_count * buffs.productivity_per_A1_operator
+            + (
+                  Math.floor(buffs.engineering_robot_per_facility_level_max_64 * Math.min(64, base.getSumOfFacilityLevels()) / 16)
+                * buffs.productivity_per_16_engineering_robot
+                + Math.floor(buffs.engineering_robot_per_facility_level_max_64 * Math.min(64, base.getSumOfFacilityLevels()) / 8)
+                * buffs.productivity_per_8_engineering_robot
+            )
+            + buffs.productivity_per_monster_meal * monsterMealCount // Marcille with external Senshi buff
+            + buffs.productivity_flat_if_morale_diff_gt_12 // Totter, here assumed to never fall below 12 morale
+        ;
 
         // Gold only
-        let goldPD = productivity_gold_flat;
+        let goldPD = 0
+            + buffs.productivity_gold_flat
+            + buffs.productivity_gold_per_dorm_sum * 20 // TODO: replace by actual sum of dorms
+            + buffs.productivity_gold_per_trading_post * 2 // TODO: replace by actual number of TPs
+            + buffs.productivity_gold_per_BSW_operator * bswOpInBase // Doesn't check just the current FAC
+            + buffs.productivity_gold_per_robot_in_pp * robotsInPPCount
+            + buffs.alanna_give_me_a_hand * buffs.is_warmy_present * 15 // 15% if both Warmy & Alanna present
+            + buffs.pinus_sylvestris_skill_count * hasFlametailBuff * -10
+        ;
 
         // EXP only
-        let expPD = 0;
-
-        // Generalistic
-        let allPD = 0;
-
-        // Capped at 100, not debuffed by Jaye
-        let degenbrecherProductivity = Math.min(buffs.productivity_per_5_external_cap * Math.floor(buffs.cap_flat / 5), 100);
-
-        let bonusCap =
-            buffs.cap_flat
-            // Jaye exclusive, cap reduction based on other ops productivity
-            + buffs.cap_per_10_external_productivity * Math.floor((degenbrecherProductivity + buffs.productivity_flat) / 10);
-
-        let totalProductivity =
-            // Standard productivity
-            buffs.productivity_flat
-            // Swire alter exclusive
-            + buffs.productivity_per_external_cap * bonusCap
-            // Jaye exclusive
-            + (
-                + buffs.productivity_per_total_cap * (bonusCap + 10)
-                + buffs.productivity_per_diff_max_to_current * (bonusCap + 10)
-            ) / 2
-            // Degenbrecher exclusive
-            + degenbrecherProductivity
+        let expPD = 0
+            + buffs.productivity_exp_flat
+            + buffs.leto_through_thick_and_thin * isGummyInTP * 35
+            + buffs.pinus_sylvestris_skill_count * hasFlametailBuff * 10
+            // Vermeil
+            + buffs.cap_exp_flat * buffs.productivity_per_total_cap_vermeil * buffs.is_bubble_absent
+            // Bubble
+            + buffs.cap_exp_flat * buffs.productivity_per_total_cap_bubble
         ;
 
         return {
             "operator1": ops[0],
             "operator2": ops[1],
             "operator3": ops[2],
-            "bonus": bonusCap,
-            "totalCap": bonusCap + 54, // 24/36/54 extra based on FAC lvl
-            "totalAllProductivity": totalProductivity,
-            "totalExpProductivity": totalProductivity,
-            "totalGoldProductivity": totalProductivity
+            "expCap": buffs.cap_exp_flat,
+            "totalCap": buffs.cap_all_flat + buffs.cap_exp_flat,
+            "totalProductivity": roundTo(allPD, 2),
+            "totalExpProductivity": roundTo(allPD + expPD, 2),
+            "totalGoldProductivity": roundTo(allPD + goldPD, 2)
         };
     }
 
