@@ -347,11 +347,34 @@ const SKILLS = {
     "manu_prod_spd_double[100]":{
         "christine_feasting": 1
     },
+
     // ========================== TRADING POST =============================
 
     // Swire alter E0, Cuora E1
-    "trade_ord_spd[000]": {
+    "trade_ord_spd[000]":{
         "productivity_flat": 20
+    },
+    // Exusiai E0
+    "trade_ord_spd[010]":{
+        "productivity_flat": 20
+    },
+    // Exusiai E2
+    "trade_ord_spd[020]":{
+        "productivity_flat": 35
+    },
+    // Hoederer E0
+    "trade_ord_par&per[000]":{
+        "productivity_flat": 25,
+        "productivity_if_ines_working": 5
+    },
+    // Hoederer E2 (replaces)
+    "trade_ord_par&per[001]":{
+        "productivity_flat": 30,
+        "productivity_if_ines_or_w_working": 5
+    },
+    // Exusiai alter E2
+    "trade_ord_spd_par[001]":{
+        "productivity_per_laterano": 15
     },
     // Swire alter E2
     "trade_ord_spd_variable[000]": {
@@ -365,6 +388,28 @@ const SKILLS = {
     // Jaye E1
     "trade_ord_limit_diff[000]":{
         "productivity_per_diff_max_to_current": 4
+    },
+    // Lemuen E0
+    "trade_ord_spd&multiPar[000]":{
+        "productivity_flat": 20,
+    },
+    // Lemuen E2 (replaces...?)
+    "trade_ord_spd&multiPar[100]":{
+        "productivity_flat": 20,
+        "productivity_if_exusiai_present": 35
+    },
+    // Archetto E0
+    "trade_ord_spd&dorm&lv[000]":{
+        "productivity_per_dorm": 1
+    },
+    // Archetto E2
+    "trade_ord_spd&dorm&lv[010]":{
+        "productivity_per_dorm": 2
+    },
+    // Jessica alter E0
+    "trade_ord_spd&limit[001]":{
+        "productivity_flat": 10,
+        "cap_flat": 4
     },
     // Silverash E0, Courier E0, Matterhorn E0
     "trade_ord_spd&limit[020]": {
@@ -395,4 +440,221 @@ const SKILLS = {
     "trade_ord_spd_variable3[000]": {
         "productivity_per_5_external_cap": 25
     },
+
+    // ========================== POWER PLANT =============================
+
+    // Blaze E0, Ifrit E0
+    "power_rec_spd[001]":{
+        "productivity": 10
+    },
+    // Goldenglow E0
+    "power_rec_spd[003]":{
+        "productivity": 10
+    },
+    // Leizi alter E0
+    "power_rec_spd[007]":{
+        "productivity": 10
+    },
+    // Ifrit E2
+    "power_rec_spd[013]":{
+        "productivity": 15
+    },
+    // Goldenglow E2
+    "power_rec_spd[023]":{
+        "productivity": 20
+    },
+    // Blaze alter E2
+    "power_rec_spd[1022]":{
+        "productivity": 20
+    },
+    // Muelsyse E2
+    "power_rec_rhine[000]":{
+        "productivity": 10,
+        "productivity_per_rhine_5_stacks": 3
+    },
+
+    // ========================== RECEPTION ROOM =============================
+
+    // Angelina E0, Mostima E0
+    "meet_spd&team[000]":{
+        "clue_speed": 10
+    },
+    // Mostima E2
+    "meet_spd&team[020]":{
+        "clue_speed": 10,
+        "clue_bias_penguin_logistics": 1
+    },
+    // Angelina E2 (replaces)
+    "meet_spd&team[060]":{
+        "clue_speed": 10,
+        "clue_bias_rhodes_island": 1
+    },
+    // Ch'en E2
+    "meet_spd&team[100]":{
+        "clue_speed": 25
+    },
+    // Ho'olheyak E0
+    "meet_spd&cost_condChar[001]":{
+        "clue_speed_solo": 15
+    },
+    // Ho'olheyak E2
+    "meet_spd&cost_condChar[011]":{
+        "clue_speed_solo": 35
+    },
+    // Ines E2
+    "meet_spd_hast[000]":{
+        "clue_speed": 20,
+        "clue_speed_per_hour_5_stacks": 2
+    },
+
+    // ========================== HUMAN RESOURCES =============================
+
+    // Ines E0
+    "hire_spd[001]":{
+        "hire_speed": 35
+    },
+    // Eyja E2
+    "hire_spd[011]":{
+        "hire_speed": 45
+    },
+    // Lin E0
+    "hire_spd_cost[111]":{
+        "hire_speed": 20
+    },
+    // Penance E0
+    "hire_spd_cost[210]":{
+        "hire_speed": 50
+    },
+    // Lin E2
+    "hire_spd_cost&extra[000]":{
+        "hire_speed_per_extra_recruit_slot": 10
+    },
+    // Mountain E0
+    "hire_spd&clue2[230]":{
+        "hire_speed": 20
+    },
+
+    // ========================== CONTROL CENTER =============================
+
+    // Nymph E2
+    "control_dorm_rec[002]":{
+        "dorm_morale_recovery": 0.05
+    },
+    // Ascalon E0
+    "control_train_spd[010]":{
+        "specialization_training_speed": 5
+    },
+    // Blaze alter E0
+    "control_train_spd[011]":{
+        "specialization_training_speed": 5
+    },
+    // Ascalon E2
+    "control_tra_spd[030]":{
+        "trading_post_productivity": 7
+    },
+    // Kal'tsit E2
+    "control_prod_spd[000]":{
+        "factory_productivity": 2
+    },
+    // Mon3tr E2
+    "control_prod_spd[1000]":{
+        "factory_productivity": 2
+    },
+    // Civilight Eterna E0
+    "control_mp_cost_double[000]":{
+        "amiya_civilight_morale_recovery": 0.05
+    },
+    // Civilight Eterna E2 (replaces)
+    "control_mp_cost_double[001]":{
+        "amiya_civilight_morale_recovery": 0.1
+    },
+    // Civilight Eterna E2
+    "control_upMeetingSpeed[100]":{
+        "clue_speed": 15
+    },
+    // Ch'en E0
+    "control_mp_cost&faction[000]":{
+        "morale_recovery_per_lungmen_department": 0.05
+    },
+    // Gnosis E0
+    "control_mp_cost&faction[030]":{
+        "morale_recovery_per_karlan_trade": 0.05
+    },
+    // Lee E0
+    "workshop_proc_probability[010]":{ // Yes, the ID is weird, blame HG
+        "morale_recovery_if_aak_present": 0.25
+    },
+    // Lee E2
+    "control_mp_cost&faction2[000]":{
+        "clue_speed": 25
+    },
+    // Chong Yue E0
+    "control_mp_cost&bd_up[000]":{
+        "world_plight_per_sui": 5
+    },
+    // Dusk E0
+    "control_mp_cost&bd1[000]":{
+        "morale_recovery": 0.05,
+        "wordly_plight_below_half_morale": 15
+    },
+    // Dusk E0
+    "control_mp_cost&bd2[000]":{
+        "morale_recovery": 0.05,
+        "perception_information_above_half_morale": 10
+    },
+    // Flametail E0
+    "control_mp_cost[007]":{
+        "morale_recovery": 0.05,
+        "smiley_count": 1
+    },
+    // Mlynar E0
+    "control_mp_cost[008]":{
+        "morale_recovery": 0.05,
+        "smiley_count": 1
+    },
+    // Mon3tr E0
+    "control_mp_cost[012]":{
+        "morale_recovery": 0.05,
+        "smiley_count": 1
+    },
+    // Mlynar E2
+    "control_mp_lonely[000]":{
+        "morale_recovery_pp_hr_rr": 0.1,
+        "recover_morale_for_others_from_smileys": 1
+    },
+    // Chong Yue E2
+    "control_mp_bd_cost_expand[000]":{
+        "morale_recovery_others": 0.05,
+        "morale_recovery_others_per_20_wordly_plight": 0.05
+    },
+
+    // ========================== TRAINING ROOM =============================
+
+    // Aak E2
+    "train_spd&profession[170]":{
+        "training_speed_medic": 60
+    },
+    // Carnelian E0
+    "train_spd&profession[050]":{
+        "training_speed_caster": 30
+    },
+    // Carnelian E2
+    "train_spd&profession[150]":{
+        "training_speed_caster": 60
+    },
+    // Ch'en alter E0
+    "train_spd&profession2[040]":{
+        "training_speed_sniper": 30
+    },
+    // Ch'en alter E2
+    "train_spd&profession2[440]":{
+        "training_speed_sniper": 30,
+        "training_speed_sniper_M1": 65
+    },
+    // Ela E0
+    "train_spd_tag[020]":{
+        "training_speed_per_op_in_base_4_stacks": 10
+    }
+
+
 };

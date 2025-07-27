@@ -22,13 +22,11 @@ class Planner {
      * investment required. For instance, newer players may not realize that Purestream is a a large 40/60% gold
      * productivity depending on setup, so it makes it easier to spot easy ways to improve the base.
      */
-    planify(operators, base, isMoraleMicro, isAssumeE1) {
-
-        // Since 5 & 6* operators unlock their base skills at E2, it only makes a difference for 
-        if(isAssumeE1){
+    planify(operators, base, isMoraleMicro, assumePromotionLevel) {
+        if(assumePromotionLevel > 0){
             for(let operator of operators){
-                if(operator.elite === 0){
-                    operator.elite = 1;
+                if(operator.elite < assumePromotionLevel){
+                    operator.elite = parseInt(assumePromotionLevel);
                 }
             }
         }
@@ -63,13 +61,20 @@ class Planner {
         console.log(babelScore);
         let puddingScore = this.evaluatePudding(operators);
         console.log(puddingScore);
+        // TODO: Team rainbow
 
         // ========== FACTORY ==========
 
         // ---------- Teams ----------
 
-        let vermeilExpScore = this.evaluateVermeil(operators, base);
-        console.log(vermeilExpScore);
+        let vermeilScore = this.evaluateOperatorForFAC(
+            operators, base, "char_190_clour", VERMEIL_AND_BUBBLE_TEAM_CANDIDATES, 1
+        );
+        console.log(vermeilScore);
+        let bubbleScore = this.evaluateOperatorForFAC(
+            operators, base, "char_381_bubble", VERMEIL_AND_BUBBLE_TEAM_CANDIDATES, 1
+        );
+        console.log(bubbleScore);
 
 
         // ---------- Singles ----------
@@ -77,6 +82,7 @@ class Planner {
         // ========== TRADING POST ==========
 
         // ---------- Teams ----------
+        // TODO: Pozy gold line
 
         // ---------- Singles ----------
 
@@ -651,7 +657,7 @@ class Planner {
         let squads = this.__composeSquadsOf3(operatorsToTest);
         let bestPerforming;
         for(let squad of squads){
-            let results = this.__getTradingPostStats(squad);
+            let results = this.__getTradingPostStats(squad, true);
             if(!bestPerforming || results.totalProductivity > bestPerforming.totalProductivity){
                 bestPerforming = results;
             }
@@ -711,6 +717,9 @@ class Planner {
             }
         }
 
+        let bothYatoAndNoirCorneE2 = yatoAlter && yatoAlter.elite === 2
+            && noirCorneAlter && noirCorneAlter.elite === 2;
+
         return {
             "isYatoAlterUsed": isYatoAlterUsed,
             "isNoirCorneAlterUsed": isNoirCorneAlterUsed,
@@ -718,8 +727,8 @@ class Planner {
             "isVermeilUsed": isVermeilUsed,
             "facPD": trcFacPD,
             "tpPD": trcTPPD,
-            "hasFacBuff": yatoAlter && yatoAlter.elite === 2,
-            "hasTPBuff": noirCorneAlter && noirCorneAlter.elite === 2
+            "hasFacBuff": bothYatoAndNoirCorneE2,
+            "hasTPBuff": bothYatoAndNoirCorneE2
         };
     }
 
@@ -1053,28 +1062,27 @@ class Planner {
     /**
      * Evaluate the player's roster to see the best partners for Vermeil
      */
-    evaluateVermeil(operators, base) {
-        let vermeil = operators.find(e => e.id === "char_190_clour");
-        if(!vermeil || (vermeil && vermeil.elite === 0)){
+    evaluateOperatorForFAC(ownedOperators, base, coreOperatorId, teamCandidates, minimumPromotion) {
+        let coreOperator = ownedOperators.find(e => e.id === coreOperatorId);
+        let appellation = CHARACTER_TABLE[coreOperatorId].appellation;
+        if(!coreOperator || (coreOperator && coreOperator.elite < minimumPromotion)){
             return {
-                "isVermeilUsed": false
+                "isOperatorUsed": false,
+                "operatorAppellation": appellation
             };
         }
 
         // Retrieve all the listed operators, remove those who aren't found to save up on calcs
-        let operatorsToTest = operators.filter(e => [
-            "char_336_folivo", "char_485_pallas", "char_2013_cerber", "char_1032_excu2", "char_328_cammou",
-            "char_1042_phatm2", "char_4198_christ", "char_4138_narant", "char_4155_talr", "char_4171_wulfen",
-            "char_464_cement", "char_378_asbest", "char_452_bstalk", "char_500_noirc", "char_150_snakek"
-            ].indexOf(e.id) !== -1
+        let operatorsToTest = ownedOperators.filter(
+            e => teamCandidates.indexOf(e.id) !== -1
         );
 
-        // We build squads of 2, since Vermeil will always be in the first slot
+        // We build squads of 2, since the core operator is always present
         let squads = this.__composeSquadsOf2(operatorsToTest);
         let bestPerformingExp;
         let bestPerformingGold;
         for(let squad of squads){
-            squad.push(vermeil);
+            squad.push(coreOperator);
             let results = this.__getFactoryStats(squad, base);
             // Replacing EXP squad if current is better
             if(!bestPerformingExp || results.totalExpProductivity > bestPerformingExp.totalExpProductivity){
@@ -1088,7 +1096,8 @@ class Planner {
         }
 
         return {
-            "isVermeilUsed": true,
+            "isOperatorUsed": true,
+            "operatorAppellation": appellation,
             "squadExp": bestPerformingExp,
             "squadGold": bestPerformingGold
         };
@@ -1182,6 +1191,8 @@ class Planner {
     /**
      * Given a list of 3 operators, return the expected stats for a factory
      * TODO: Take into account Totter's lower morale for his (de)buffs
+     * TODO: Implement Waai Fu
+     * TODO: restructure arguments
      * @param  {Array[Operator]} ops: An array containing 2 or 3 operators (functions with less)
      * @param  {Array[Object]} base: An array listing details about the base (number of dorms,
      * FAC & TP distribution...)

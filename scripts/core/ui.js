@@ -3,8 +3,6 @@
  * elements that are not removed/added
  */
 
-// Target dummies
-
 document.getElementById("plan").addEventListener("click", (e) => {
-    kroosterAdapter.retrieve(document.getElementById("krooster").value);
+    kroosterAdapter.fetchKroosterApiUserData(document.getElementById("krooster").value);
 });

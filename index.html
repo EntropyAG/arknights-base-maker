@@ -17,8 +17,12 @@
 			<input type="checkbox" id="moraleMicro"/>
 			<br class="clear" />
 
-			<label for="assumeE1">Assume 4* and lower are always at least E1 for base skills?</label>
-			<input type="checkbox" id="assumeE1"/>
+			<label for="assumePromotionLevel">Assume operators have a minimum promotion level?</label>
+			<select id="assumePromotionLevel">
+				<option value="0">No</option>
+				<option value="1" selected>Assume 4* and lower are maxed</option>
+				<option value="2">Assume all operators are maxed</option>
+			</select>
 			<br class="clear" />
 
 			<label for="nbFacGold">How many Factories should produce gold?</label>

@@ -9,15 +9,6 @@ class KroosterAdapter {
 
 	}
 
-    retrieve(username){
-        if(!username){
-            let input = JSON.parse(document.getElementById("krooster").value);
-            return this.processOperators(input);
-        }
-
-        this.fetchKroosterApiUserData(username);
-    }
-
     fetchKroosterApiUserData(username){
         fetch("https://www.krooster.com/api/u/"+username).then(function(response) {
             return response.json();
@@ -67,7 +58,7 @@ class KroosterAdapter {
             operators,
             base,
             document.getElementById("moraleMicro").checked,
-            document.getElementById("assumeE1").checked
+            document.getElementById("assumePromotionLevel").value
         );
     }
 }
