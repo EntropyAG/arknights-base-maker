@@ -1,6 +1,4 @@
 class Planner {
-
-
     // Singleton
     constructor() {
         if (Planner._instance) {
@@ -17,10 +15,8 @@ class Planner {
      * @param {Boolean} isMoraleMicro: true if the player is willing to micromanage the morale of specific
      * operators, such as Dusk / Ling in a PI combo or some workshop operators requiring those in dorm to have
      * a morale below a certain threshold
-     * @param {Boolean} isAssumeE1: true if 4* or lower rarity operators are considered to be E1. This is because
-     * upgrading them to E1 lvl 1 for base purposes is extremely cheap and has a very short delay to pay back the
-     * investment required. For instance, newer players may not realize that Purestream is a a large 40/60% gold
-     * productivity depending on setup, so it makes it easier to spot easy ways to improve the base.
+     * @param {Integer} assumePromotionLevel: The promotion (elite) level operators will be forced to have
+     * to ensure they have access to relevant skills.
      */
     planify(operators, base, isMoraleMicro, assumePromotionLevel) {
         if(assumePromotionLevel > 0){
@@ -47,7 +43,7 @@ class Planner {
         console.log(pinusScore);
         let glasgowScore = this.evaluateGlasgow(operators, base);
         console.log(glasgowScore);
-        let karlanScore = this.evaluateKarlanTrade(operators, base);
+        let karlanScore = this.evaluateJayeAndKT(operators, base);
         console.log(karlanScore);
         let monhunScore = this.evaluateMonHun(operators);
         console.log(monhunScore);
@@ -61,7 +57,6 @@ class Planner {
         console.log(babelScore);
         let puddingScore = this.evaluatePudding(operators);
         console.log(puddingScore);
-        // TODO: Team rainbow
 
         // ========== FACTORY ==========
 
@@ -79,10 +74,20 @@ class Planner {
 
         // ---------- Singles ----------
 
+        //let 
+
         // ========== TRADING POST ==========
 
         // ---------- Teams ----------
-        // TODO: Pozy gold line
+        let shamareScore = this.evaluateShamareSquad(operators);
+        console.log(shamareScore);
+        //let penguinScore = this.evaluatePenguinLogistics(operators);
+        //console.log(penguinScore);
+        //let pozyGLPScore = this.evaluatePozyGLP(operators, base);
+        //console.log(pozyGLPScore);
+        // TODO: E0 Jaye
+        // TODO: E1 Jaye
+        // TODO: Proviso
 
         // ---------- Singles ----------
 
@@ -99,6 +104,14 @@ class Planner {
         // ========== POWER PLANT ==========
 
         // ========== HUMAN RESOURCES (OFFICE) ==========
+
+
+        // ========== CONTROL CENTER ==========
+
+        // TODO: Alter morale squad
+        // TODO: Lee agency
+        // TODO: Mlynar smiley squad
+
 
         /********************************************************************
          ********** Planning the rotations based on above findings **********
@@ -414,7 +427,7 @@ class Planner {
      * The evaluation first covers gold production, then EXP, since they are identical
      * apart from the introduction of Flametail
      */
-    evaluatePinus(operators, base, assumeE1) {
+    evaluatePinus(operators, base) {
         let isVivianaUsed = false;
         let isWildmaneUsed = false;
         let isAshlockUsed = false;
@@ -481,7 +494,7 @@ class Planner {
         }
 
         let gravel = operators.find(e => e.id === "char_237_gravel");
-        if (gravel && (gravel.elite >= 1 || assumeE1)) {
+        if (gravel && (gravel.elite >= 1)) {
             isGravelUsed = true;
             gravelPDGold = 35;
 
@@ -633,15 +646,8 @@ class Planner {
      * Because there are plenty of operators combos to test, we kinda have to list all the possible
      * combos within a TP
      */
-    evaluateKarlanTrade(operators, base) {
+    evaluateJayeAndKT(operators) {
         let gnosis = operators.find(e => e.id === "char_206_gnosis");
-        // No point in trying unless there is Gnosis, operators otherwise have subpar performance
-        if(!gnosis || (gnosis && gnosis.elite < 2)){
-            return {
-                "isGnosisUsed": false
-            };
-        }
-
         let swireAlt = operators.find(e => e.id === "char_1033_swire2");
         let silverAsh = operators.find(e => e.id === "char_172_svrash");
         let degenbrecher = operators.find(e => e.id === "char_4116_blkkgt");
@@ -650,6 +656,11 @@ class Planner {
         let matterhorn = operators.find(e => e.id === "char_199_yak");
         let jaye = operators.find(e => e.id === "char_272_strong");
 
+        let isGnosisUsed = false;
+        if(gnosis && gnosis.elite === 2){
+            isGnosisUsed = true;
+        }
+
         let operatorsToTest = [
             swireAlt, silverAsh, degenbrecher, cliffheart, courier, matterhorn, jaye
         ].filter(e => e !== undefined);
@@ -657,14 +668,14 @@ class Planner {
         let squads = this.__composeSquadsOf3(operatorsToTest);
         let bestPerforming;
         for(let squad of squads){
-            let results = this.__getTradingPostStats(squad, true);
+            let results = this.__getTradingPostStats(squad, isGnosisUsed);
             if(!bestPerforming || results.totalProductivity > bestPerforming.totalProductivity){
                 bestPerforming = results;
             }
         }
 
         return {
-            "isGnosisUsed": true,
+            "isGnosisUsed": isGnosisUsed,
             "squad": bestPerforming
         };
     }
@@ -1060,7 +1071,93 @@ class Planner {
     }
 
     /**
-     * Evaluate the player's roster to see the best partners for Vermeil
+     * Evaluate the player's roster to see whether it's viable to use Shamare and her squad.
+     * Note that while the team works on a TP, it increases the relative value of gold used,
+     * meaning it takes less gold to make as much LMD as possible (by default 500 LMD/gold bar).
+     */
+    evaluateShamareSquad(operators) {
+        let results = {
+            shamareElite: -1,
+            tequilaElite: -1,
+            bibeakElite: -1,
+            kafkaElite: -1,
+            paprikaElite: -1,
+            diamanteElite: -1,
+            equivalentTpPd: 0,
+            alpha: 0,
+            beta: 0
+        };
+
+        let shamare = operators.find(e => e.id === "char_254_vodfox");
+        // The team is subpar without E2 Shamare, so just force quit if the player doesn't have her
+        if(!shamare || (shamare && shamare.elite !== 2)){
+            return results;
+        }
+        results.shamareElite = shamare.elite;
+
+        let tequila = operators.find(e => e.id === "char_486_takila");
+        let bibeak = operators.find(e => e.id === "char_252_bibeak");
+        let kafka = operators.find(e => e.id === "char_214_kafka");
+        let paprika = operators.find(e => e.id === "char_4071_peper");
+        let diamante = operators.find(e => e.id === "char_499_kaitou");
+
+        // First, check what tier of gold bar value we'll be using depending on Tequila
+        let barValueDefault = TP_ORDERS.GOLD_VALUES[0];
+        let barValueTequila = TP_ORDERS.GOLD_VALUES[0];
+        if(tequila){
+            results.tequilaElite = tequila.elite;
+            barValueTequila = TP_ORDERS.GOLD_VALUES[1];
+            if(tequila.elite === 2){
+                barValueTequila = TP_ORDERS.GOLD_VALUES[2];
+            }
+        }
+
+        // Second, find the best Tailoring operator
+        results.alpha = 1; // We start at one, because Shamare has it on her E0
+        results.beta = 0;
+        for(let operator of [bibeak, kafka, paprika, diamante]){
+            if(!operator){
+                continue;
+            }
+            results[operator.appellation.toLocaleLowerCase()+"Elite"] = operator.elite;
+            if(operator.elite === 2){
+                results.beta++;
+            }else{
+                results.alpha++;
+            }
+        }
+
+        // ============= Calculating PD =============
+        // Get the weighted value of LMD produced for 4-bars orders
+        let weights = TP_ORDERS.WEIGHTS[1];
+        if(results.beta >= 0){
+            weights = TP_ORDERS.WEIGHTS[3];
+        }else if(results.alpha >= 2){
+            weights = TP_ORDERS.WEIGHTS[2];
+        }
+
+        let weightedLMDValue =
+          weights[0] * barValueDefault * 2
+        + weights[1] * barValueDefault * 3
+        + weights[2] * barValueTequila * 4;
+
+        // Get the weighted time
+        let squadPD = 1.93; // 90% due to Shamare + 3% from innate PD due to operators slotted
+        let times = TP_ORDERS.TIME;
+        let weightedTime =
+            weights[0] * times[2] / squadPD
+          + weights[1] * times[3] / squadPD
+          + weights[2] * times[4] / squadPD;
+
+        // Divide both for estimated PD (TP3 as a baseline)
+        let lmdPerDay = weightedLMDValue / weightedTime * 24 * 60;
+        results.equivalentTpPd = roundTo((lmdPerDay / TP_DAILY_LMD[2] - 1) * 100, 2);
+        return results;
+    }
+
+    /**
+     * Evaluate the player's roster to see the best partners for a given core operator.
+     * Used in particular for both Vermeil and Bubble
      */
     evaluateOperatorForFAC(ownedOperators, base, coreOperatorId, teamCandidates, minimumPromotion) {
         let coreOperator = ownedOperators.find(e => e.id === coreOperatorId);
@@ -1113,7 +1210,7 @@ class Planner {
     __checkOperatorCount(...opsUsed){
         let count = 0;
         for(let opUsed of opsUsed){
-            if(opUsed === true){
+            if(opUsed === true || (opUsed !== undefined && opUsed !== null)){
                 count++;
             }
         }

@@ -3,13 +3,16 @@ class Operator {
 	id;
 	elite; // 0, 1, 2
 	skills; // As retrieved from original config files, check building_data.chars.{any}.buffChar
+	appellation; // Effectively the operator name as it appears ingame
 
-	constructor(id, elite) {
+	constructor(id, elite, appellation, rarity) {
 		if(id === undefined || elite === undefined || id === null || elite === null){
 			throw new Error("Operators must be initialized by specifying both their ID and promotion level");
 		}
 		this.id = id;
 		this.elite = elite;
+		this.appellation = appellation;
+		this.rarity = rarity;
 	}
 
 	getSkills(){

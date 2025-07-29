@@ -29,7 +29,13 @@ class KroosterAdapter {
             if(INVALID_OPERATORS.indexOf(operator.op_id) !== -1){
                 continue;
             }
-            operators.push(new Operator(operator.op_id, operator.elite));
+            let tableMatch = CHARACTER_TABLE[operator.op_id];
+            operators.push(new Operator(
+              operator.op_id,
+              operator.elite,
+              tableMatch.appellation,
+              parseInt(tableMatch.rarity.split("_")[1]),
+            ));
         }
         return operators;
     }
